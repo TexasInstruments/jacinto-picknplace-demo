@@ -1,0 +1,5 @@
+# List environment variables to pass to the Docker container
+# Note: no white space is allowed around "="
+PSDK_BASE_PATH=/usr/include/processor_sdk
+TI_DATA_PATH=/root/j7ros_home/data
+SDK_DIR=/opt/robotics_sdk

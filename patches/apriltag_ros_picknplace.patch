@@ -1,0 +1,153 @@
+diff --git a/apriltag_ros/config/settings.yaml b/apriltag_ros/config/settings.yaml
+index be33540..38c0601 100644
+--- a/apriltag_ros/config/settings.yaml
++++ b/apriltag_ros/config/settings.yaml
+@@ -1,8 +1,9 @@
+ # AprilTag 3 code parameters
+ # Find descriptions in apriltag/include/apriltag.h:struct apriltag_detector
+ #                      apriltag/include/apriltag.h:struct apriltag_family
+-tag_family:        'tag36h11' # options: tagStandard52h13, tagStandard41h12, tag36h11, tag25h9, tag16h5, tagCustom48h12, tagCircle21h7, tagCircle49h12
++tag_family:        'tag16h5' # options: tagStandard52h13, tagStandard41h12, tag36h11, tag25h9, tag16h5, tagCustom48h12, tagCircle21h7, tagCircle49h12
+ tag_threads:       2          # default: 2
++tag_border:        1
+ tag_decimate:      1.0        # default: 1.0
+ tag_blur:          0.0        # default: 0.0
+ tag_refine_edges:  1          # default: 1
+diff --git a/apriltag_ros/config/tags.yaml b/apriltag_ros/config/tags.yaml
+index d24f148..1176819 100644
+--- a/apriltag_ros/config/tags.yaml
++++ b/apriltag_ros/config/tags.yaml
+@@ -21,6 +21,12 @@
+ #   ]
+ standalone_tags:
+   [
++     {id: 1, size: 0.0235, name: preset_0, x: 0,    y: 0,    z: 0, qw: 1, qx: 0, qy: 0, qz: 0},
++     {id: 2, size: 0.0235, name: unset_2},
++     {id: 3, size: 0.0235, name: unset_3},
++     {id: 4, size: 0.0235, name: unset_4},
++     {id: 5, size: 0.0235, name: unset_5},
++     {id: 6, size: 0.0235, name: unset_6},
+   ]
+ # ## Tag bundle definitions
+ # ### Remarks
+diff --git a/apriltag_ros/include/apriltag_ros/common_functions.h b/apriltag_ros/include/apriltag_ros/common_functions.h
+index 4363fa1..43237b8 100644
+--- a/apriltag_ros/include/apriltag_ros/common_functions.h
++++ b/apriltag_ros/include/apriltag_ros/common_functions.h
+@@ -63,6 +63,7 @@
+ #include <tf/transform_broadcaster.h>
+ 
+ #include <apriltag.h>
++#include <apriltag_pose.h>
+ 
+ #include "apriltag_ros/AprilTagDetection.h"
+ #include "apriltag_ros/AprilTagDetectionArray.h"
+diff --git a/apriltag_ros/launch/continuous_detection.launch b/apriltag_ros/launch/continuous_detection.launch
+index d176f9b..07e464a 100644
+--- a/apriltag_ros/launch/continuous_detection.launch
++++ b/apriltag_ros/launch/continuous_detection.launch
+@@ -1,8 +1,8 @@
+ <launch>
+   <arg name="launch_prefix" default="" /> <!-- set to value="gdbserver localhost:10000" for remote debugging -->
+   <arg name="node_namespace" default="apriltag_ros_continuous_node" />
+-  <arg name="camera_name" default="/camera_rect" />
+-  <arg name="image_topic" default="image_rect" />
++  <arg name="camera_name" default="/camera" />
++  <arg name="image_topic" default="image_raw" />
+ 
+   <!-- Set parameters -->
+   <rosparam command="load" file="$(find apriltag_ros)/config/settings.yaml" ns="$(arg node_namespace)" />
+diff --git a/apriltag_ros/src/common_functions.cpp b/apriltag_ros/src/common_functions.cpp
+index 958c0e2..5b9127c 100644
+--- a/apriltag_ros/src/common_functions.cpp
++++ b/apriltag_ros/src/common_functions.cpp
+@@ -299,6 +299,9 @@ AprilTagDetectionArray TagDetector::detectTags (
+     if (!findStandaloneTagDescription(tagID, standaloneDescription,
+                                       !is_part_of_bundle))
+     {
++      detection->id = -1;
++      zarray_set(detections_, i, &detection, NULL);
++
+       continue;
+     }
+ 
+@@ -329,9 +332,79 @@ AprilTagDetectionArray TagDetector::detectTags (
+     std::vector<cv::Point2d > standaloneTagImagePoints;
+     addObjectPoints(tag_size/2, cv::Matx44d::eye(), standaloneTagObjectPoints);
+     addImagePoints(detection, standaloneTagImagePoints);
++
++    /***********************************/
++    // Add additional geometric check
++    float dist1, dist2, dist3, dist4;
++    dist1 = (standaloneTagImagePoints[0].x - standaloneTagImagePoints[1].x) * (standaloneTagImagePoints[0].x - standaloneTagImagePoints[1].x);
++    dist1 += (standaloneTagImagePoints[0].y - standaloneTagImagePoints[1].y) * (standaloneTagImagePoints[0].y - standaloneTagImagePoints[1].y);
++    dist1 = sqrt(dist1);
++
++    dist2 = (standaloneTagImagePoints[1].x - standaloneTagImagePoints[2].x) * (standaloneTagImagePoints[1].x - standaloneTagImagePoints[2].x);
++    dist2 += (standaloneTagImagePoints[1].y - standaloneTagImagePoints[2].y) * (standaloneTagImagePoints[1].y - standaloneTagImagePoints[2].y);
++    dist2 = sqrt(dist2);
++
++    dist3 = (standaloneTagImagePoints[2].x - standaloneTagImagePoints[3].x) * (standaloneTagImagePoints[2].x - standaloneTagImagePoints[3].x);
++    dist3 += (standaloneTagImagePoints[2].y - standaloneTagImagePoints[3].y) * (standaloneTagImagePoints[2].y - standaloneTagImagePoints[3].y);
++    dist3 = sqrt(dist3);
++
++    dist4 = (standaloneTagImagePoints[3].x - standaloneTagImagePoints[0].x) * (standaloneTagImagePoints[3].x - standaloneTagImagePoints[0].x);
++    dist4 += (standaloneTagImagePoints[3].y - standaloneTagImagePoints[0].y) * (standaloneTagImagePoints[3].y - standaloneTagImagePoints[0].y);
++    dist4 = sqrt(dist4);
++
++    if (dist1 < 20 ||  dist2 < 20 || dist3 < 20 || dist4 < 20 )
++    {
++      detection->id = -1;
++      zarray_set(detections_, i, &detection, NULL);
++      continue;
++    }
++
++    if (abs(dist1 - dist3) > 1.25*dist1 || abs(dist1 - dist3) > 1.25*dist3)
++    {
++      detection->id = -1;
++      zarray_set(detections_, i, &detection, NULL);
++      continue;
++    }
++
++    if (abs(dist2 - dist4) > 1.25*dist2 || abs(dist2 - dist4) > 1.25*dist4)
++    {
++      detection->id = -1;
++      zarray_set(detections_, i, &detection, NULL);
++      continue;
++    }
++
++    if (dist1 + dist3 > 1.25*(dist2 + dist4) || dist2 + dist4 > 1.25*(dist1 + dist3))
++    {
++      detection->id = -1;
++      zarray_set(detections_, i, &detection, NULL);
++      continue;
++    }
++
++#if 0
+     Eigen::Matrix4d transform = getRelativeTransform(standaloneTagObjectPoints,
+                                                      standaloneTagImagePoints,
+                                                      fx, fy, cx, cy);
++#else
++    // First create an apriltag_detection_info_t struct using known parameters.
++    apriltag_detection_info_t info;
++    info.det = detection;
++    info.tagsize = tag_size;
++    info.fx = fx;
++    info.fy = fy;
++    info.cx = cx;
++    info.cy = cy;
++
++    // Then call estimate_tag_pose.
++    apriltag_pose_t pose;
++    double err = estimate_tag_pose(&info, &pose);
++
++    Eigen::Matrix4d transform;
++    transform << pose.R->data[0], pose.R->data[1], pose.R->data[2], pose.t->data[0], 
++                 pose.R->data[3], pose.R->data[4], pose.R->data[5], pose.t->data[1], 
++                 pose.R->data[6], pose.R->data[7], pose.R->data[8], pose.t->data[2],
++                 0,               0,               0,               1;
++#endif
++
+     Eigen::Matrix3d rot = transform.block(0, 0, 3, 3);
+     Eigen::Quaternion<double> rot_quaternion(rot);
+ 
