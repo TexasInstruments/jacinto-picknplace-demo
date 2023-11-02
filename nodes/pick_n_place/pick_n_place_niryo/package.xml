@@ -2,7 +2,7 @@
 <package format="2">
   <name>pick_n_place_niryo</name>
   <version>0.0.0</version>
-  <description>The pick_and_place_demo package</description>
+  <description>The pick_n_place_demo package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
