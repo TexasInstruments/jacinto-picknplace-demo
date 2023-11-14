@@ -1,4 +1,4 @@
-# Robotis Arm Pick-n-Place Demo on TI Platform
+# Robotics Arm Pick-n-Place Demo on TI Platform
 
 This repository maintains a demo targeted for the Niryo Ned2 Robot Arm with TI Jacinto TDA4VM and AM6xA platforms. This document walks through how to run the applications provided in this repository.
 

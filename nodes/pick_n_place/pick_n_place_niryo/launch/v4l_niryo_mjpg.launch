@@ -17,7 +17,7 @@
 
     <node pkg="gscam" name="$(arg node_name)" type="gscam" output="screen">
         <param name="gscam_config"
-            value="v4l2src device=$(arg device) io-mode=2 do-timestamp=true ! image/jpeg, width=1280, height=720 ! jpegdec ! videoconvert ! videoflip method=rotate-180 ! tiovxdlcolorconvert ! 
+            value="v4l2src device=$(arg device) io-mode=2 do-timestamp=true ! image/jpeg, width=1280, height=720 ! jpegdec ! tiovxdlcolorconvert ! video/x-raw, format=(string)NV12 ! videoflip method=rotate-180 !
             tiovxldc sensor-name=SENSOR_SONY_IMX219_RPI lut-file=/opt/robot/jacinto-picknplace-demo/nodes/pick_n_place/pick_n_place_niryo/config/niryo_HD_LUT.bin ldc-ds-factor=2 ldc-table-width=1280 ldc-table-height=720 out-block-height=16 out-block-width=64 !
             tiovxdlcolorconvert target=0 out-pool-size=4"/>
         <param name="camera_name"        value="$(arg camera_name)"/>

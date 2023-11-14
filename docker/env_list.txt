@@ -3,3 +3,4 @@
 PSDK_BASE_PATH=/usr/include/processor_sdk
 TI_DATA_PATH=/root/j7ros_home/data
 SDK_DIR=/opt/robotics_sdk
+PYTHONPATH=/root/j7ros_home/ros_ws/devel/lib/python3/dist-packages:/opt/ros/noetic/lib/python3/dist-packages:/usr/lib/python3.8/site-packages/
