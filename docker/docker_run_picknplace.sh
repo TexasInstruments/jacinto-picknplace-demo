@@ -19,7 +19,7 @@ docker run -it --rm \
     -v /opt/robotics_sdk:/opt/robotics_sdk \
     -v /opt/robot:/opt/robot \
     -v /home/root/j7ros_home/.ros:/root/.ros \
-    -v /opt/edgeai-gst-apps:/opt/edgeai-gst-apps \
+    -v /opt/edgeai-gst-apps-pick-n-place:/opt/edgeai-gst-apps \
     -v /opt/imaging:/opt/imaging \
     -v /opt/model_zoo:/opt/model_zoo \
     -v /usr/include/dlpack:/usr/include/dlpack \

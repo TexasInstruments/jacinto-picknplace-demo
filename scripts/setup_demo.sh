@@ -32,7 +32,18 @@
 
 export PROJ_PATH=/opt/robot/jacinto-picknplace-demo
 
-# 1. Clone the apriltag_ros repo
+
+# 1. Clone edgeai-gst-apps-pick-n-place and untar AprilTag detection artifacts
+cd /opt
+if [[ ! -d "edgeai-gst-apps-pick-n-place" ]]; then
+    git clone --single-branch --branch niryo_picknplace_8.6 https://github.com/TexasInstruments/edgeai-gst-apps-pick-n-place.git
+
+    mkdir /opt/model_zoo/ONR-OD-8200-yolox-nano-lite-mmdet-apriltag-416x416
+    cd edgeai-gst-apps-pick-n-place/models
+    tar -xf ONR-OD-8200-yolox-nano-lite-mmdet-apriltag-416x416.tar.gz -C /opt/model_zoo/ONR-OD-8200-yolox-nano-lite-mmdet-apriltag-416x416
+fi
+
+# 2. Clone the apriltag_ros repo
 cd  $PROJ_PATH/nodes
 if [[ ! -d "apriltag_ros" ]]; then
     git clone --single-branch --branch master https://github.com/AprilRobotics/apriltag_ros.git
@@ -43,7 +54,7 @@ if [[ ! -d "apriltag_ros" ]]; then
     git commit -m 'Jacinto pick_n_place demo patch'
 fi
 
-# 2. Clone the ned_ros repo
+# 3. Clone the ned_ros repo
 cd  $PROJ_PATH/nodes
 if [[ ! -d "ned_ros" ]]; then
     git clone --single-branch --branch master https://github.com/NiryoRobotics/ned_ros.git
@@ -51,7 +62,7 @@ if [[ ! -d "ned_ros" ]]; then
     git checkout fa4b0d92b44b2a68dd857e391c088143a6dcd716 -b jacinto_picknplace_demo
 fi
 
-# 3. Clone gscam
+# 4. Clone gscam
 cd   $PROJ_PATH/nodes/pick_n_place
 if [[ ! -d "gscam" ]]; then
     git clone --single-branch --branch master https://github.com/ros-drivers/gscam.git
@@ -60,9 +71,9 @@ if [[ ! -d "gscam" ]]; then
     git apply $PROJ_PATH/patches/gscam_ti.patch
     git add .   
     git commit -m "Customized for TI Jacinto Robotics SDK: Added pipleline that uses TI GStreamer plugins, and added NV12 encoding mode."
-fi 
+fi
 
-# 4. Build docker
+# 5. Build docker
 echo "Building docker image ..."
 bash $PROJ_PATH/docker/docker_build_picknplace.sh
 
