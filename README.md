@@ -36,7 +36,7 @@ Follow the instructions in the Robotics SDK User Guide Documentation on  [Settin
 ```
 root@tda4vm-sk:/opt/edgeai-gst-apps# cd ..
 root@tda4vm-sk:/opt# mkdir robot && cd robot
-root@tda4vm-sk:/opt/robot# git clone --single-branch --branch master https://github.com/TexasInstruments/jacinto-picknplace-demo.git
+root@tda4vm-sk:/opt/robot# git clone --single-branch --branch apriltag_picknplace https://github.com/TexasInstruments/jacinto-picknplace-demo.git
 ```
 
 
