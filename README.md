@@ -36,7 +36,7 @@ Follow the instructions in the Robotics SDK User Guide Documentation on  [Settin
 ```
 root@tda4vm-sk:/opt/edgeai-gst-apps# cd ..
 root@tda4vm-sk:/opt# mkdir robot && cd robot
-root@tda4vm-sk:/opt/robot# git clone --single-branch --branch edgeai_apriltag_picknplace https://github.com/TexasInstruments/jacinto-picknplace-demo.git
+root@tda4vm-sk:/opt/robot# git clone --single-branch --branch master https://github.com/TexasInstruments/jacinto-picknplace-demo.git
 ```
 
 
@@ -146,8 +146,8 @@ niryo@ned2 ~/catkin_ws $ roslaunch niryo_robot_bringup niryo_ned2_robot.launch
 
 ```
 root@j7-docker:~/j7ros_home/ros_ws$ source /opt/robot/jacinto-picknplace-demo/scripts/setup_ros_ip.sh
-root@j7-docker:~/j7ros_home/ros_ws$ cd /opt/edgeai-gst-apps/apps_python
-root@j7-docker:/opt/edgeai-gst-apps$ ./app_edgeai.py ../configs/object_detection.yaml
+root@j7-docker:~/j7ros_home/ros_ws$ cd /opt/edgeai-gst-apps-pick-n-place/apps_python
+root@j7-docker:/opt/edgeai-gst-apps-pick-n-place/apps_python$ ./app_edgeai.py ../configs/object_detection.yaml
 ```
 
 2. On another terminal, run docker and launch apriltag_ros
